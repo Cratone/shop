@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <nav aria-label="breadcrumb" class="mt-5">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'base' %}">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
+      </ol>
+    </nav>
+<div class="row">
+    <div class="col-md-4">
+        <img src="{{ product.image.url }}" class="img-fluid">
+    </div>
+    <div class="col-md-8">
+        <h3>{{ product.title }}</h3>
+        <p>Цена:
+          {% if product.sale %}
+            <s>{{ product.price }}</s>
+            <b style="color: red">{{ product.discount_price }}</b> руб.
+            <b>-{{ product.amount_of_discount }}%</b>
+          {% else %}
+            <b>{{ product.price }}</b> руб.
+          {% endif %}
+        </p>
+        <p>Описание: {{ product.description }}</p>
+        <hr>
+        <a href="{% url 'add_to_cart' slug=product.slug %}"><button class="btn btn-danger">Добавить в корзину</button></a>
+    </div>
+    <p class="mt-4">Характеристики:</p>
+    <table class="table">
+      <tbody>
+      {% for f_name, f_value in product.get_features.items %}
+        <tr>
+          <th scope="row">{{ f_name }}</th>
+          <td>{{ f_value }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <br>
+    {% if product.comments.count %}
+        <h4 class="text-centre">Отзывы</h4>
+        <br>
+        {% for comment in product.comments.all %}
+            <br>
+            {{ comment.author }}:<br>
+            {{ comment.text }}
+            <br>
+        {% endfor %}
+    {% else %}
+        <h5>Отзывов еще нет! Будьте первыми</h5>
+    {% endif %}
+    <br>
+    <form action="{% url 'leave_comment' product.slug %}" method="POST">
+        {% csrf_token %}
+        <input type="text" required placeholder="Ваше имя" name="name"><br>
+        <textarea name="text" required="" placeholder="Ваш отзыв" cols="30" rows="10"></textarea>
+        <button type="submit">Оставить отзыв</button>
+    </form>
+</div>
+
+{% endblock content %}
